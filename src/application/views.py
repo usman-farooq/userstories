@@ -93,6 +93,7 @@ class ResourceMainView(ListCreateAPIView):
         if serializer.is_valid():
             quota = self.request.user.quota
             # Check if user quota is set then make sure quota is not already full
+            # Best way to manage quota is through redis cache instead of db query
             if quota is not None and quota <= self.get_queryset().count():
                 content = {'status': 'Resources quota exceeded'}
                 return Response(content, status=status.HTTP_406_NOT_ACCEPTABLE)
