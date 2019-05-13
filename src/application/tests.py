@@ -10,7 +10,7 @@ class UserAPITests(TestCase):
         self.user.is_superuser = True
         self.user.save()
         self.client = Client(content_type='application/json')
-         
+        
         response = self.client.post('/auth-token', dict(username='test@example.com', password='superuser'))
         auth_token = json.loads(response.content).get('token')
         
@@ -41,7 +41,7 @@ class UserAPITests(TestCase):
         self.assertEqual(response.status_code, 200)
      
     def test_update_user_quota(self):
-        data = {'quota': '30'}
+        data = {'quota': 30}
         response = self.client.put('/users/test@example.com', data, 'application/json', **self.auth_header)
         content = json.loads(response.content)
         self.assertEqual(response.status_code, 200)
@@ -93,6 +93,26 @@ class ResourceAPITests(TestCase):
          
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(content), len(resources))
+    
+    def test_quota_exceeded(self):
+        # Set quota for user
+        data = {'quota': 1}
+        response = self.client.put('/users/test@example.com', data, 'application/json', **self.auth_header)
+        content = json.loads(response.content)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(content.get('quota'), 1)
+        self.assertEqual(content.get('email'), self.user.email)
+        
+        # Post a resource
+        response = self.create_resource('user story content')
+        content = json.loads(response.content)
+        self.assertEqual(response.status_code, 201)
+        
+        # Post another resource after quota has reached the limit
+        response = self.create_resource('user story content')
+        content = json.loads(response.content)
+        self.assertEqual(content.get('status'), 'Resources quota exceeded')
+        self.assertEqual(response.status_code, 406)
     
     def test_get_user_resources(self):
         # First create new non-super user
