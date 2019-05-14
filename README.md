@@ -2,7 +2,17 @@
 Python Django API server to manage user stories
 
 # How to run the server
-Use provided IP to access the server
+Access the server APIs at http://ec2-34-212-94-107.us-west-2.compute.amazonaws.com
+Note: APIs are using authentication token instead of session based login so get `token` from `/auth-token` API and pass to subsequent API calls as Authorization header
+
+Sample user: 
+username: admin@example.com
+password: useruser
+
+#Technical Choices
+
+* Languages and frameworks: Python3, Django 2.2.1, django restframework 3.10
+* API Authentication: rest_framewrok Token Authentication
 
 # API documentation
 
